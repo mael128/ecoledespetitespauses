@@ -1,0 +1,132 @@
+{
+  "colors": {
+    "paper": "#F3EBDC",
+    "card": "#FAF5EA",
+    "cardAlt": "#FFFDF8",
+    "ink": "#211E1A",
+    "inkSoft": "#453F38",
+    "muted": "#7A7167",
+    "mutedOnDark": "#B6AB9B",
+    "mutedOnDark2": "#D8CFC2",
+    "red": "#C4452F",
+    "redLogo": "#E2604B",
+    "blue": "#4E7FA6",
+    "green": "#6E9E62",
+    "greenDark": "#4C6B45",
+    "greenOnDark": "#C7D8C0",
+    "greenPale": "#EDF2E9",
+    "greenBright": "#9FC594",
+    "yellow": "#E3A92E",
+    "yellowPale": "#FDE9C9",
+    "purple": "#8E5BC9"
+  },
+  "cover": {
+    "meta1": "Charte de marque officielle",
+    "meta2": "Version 1 — Septembre",
+    "quote": "ça veut dire : on s'arrête un peu, et après on recommence",
+    "title": "L'École des Petites Pauses",
+    "lede": "Tout ce qu'il faut savoir pour reconnaître l'école, la dessiner correctement, et ne jamais se tromper de couleur.",
+    "facts": [
+      { "label": "Directeur de l'école", "value": "Marin, 6 ans" },
+      { "label": "Élèves inscrits", "value": "Maël (6ème), Maman, Papa, Jojo (9 mois)" },
+      { "label": "Horaires", "value": "Quand on a le temps" }
+    ]
+  },
+  "mission": {
+    "kicker": "01 — La mission",
+    "title": "Apprendre des choses, mais sans se fatiguer.",
+    "paragraph1": "L'École des Petites Pauses n'a pas de bâtiment, pas de cantine et pas de cour de récréation. Elle a un directeur de six ans, un tableau qui change de place, et une règle simple :",
+    "highlight": "quand on a le temps, on fait l'école.",
+    "paragraph2": "Elle existe parce qu'un grand frère en 6ème a beaucoup de devoirs, que Papa et Maman en ont encore plus, et que tout le monde a besoin qu'on lui dise, de temps en temps, de s'asseoir cinq minutes pour apprendre quelque chose d'inutile et d'intéressant.",
+    "pills": ["On s'arrête", "On apprend un truc", "On repart"]
+  },
+  "logo": {
+    "kicker": "02 — Le logo et ses usages",
+    "title": "Le bouton pause",
+    "protectionCaption": "ZONE DE PROTECTION\n= la largeur d'une barre, tout autour",
+    "description": "Le logo est un bouton pause. Deux barres, un rond. Les barres ont des coins tout ronds parce que « les coins pointus ça fait mal », décision du directeur, non négociable.",
+    "rules": [
+      "Taille minimum : 24 px à l'écran, une pièce de 2 euros sur papier.",
+      "Version principale : rond rouge, barres couleur papier.",
+      "Sur fond foncé : rond papier, barres rouges.",
+      "Le logo se pose toujours droit. Sauf sur les cahiers, où il peut pencher un petit peu."
+    ],
+    "handNote": "et si on appuie dessus il se passe rien, c'est normal"
+  },
+  "colorsSection": {
+    "kicker": "03 — Les couleurs",
+    "title": "Quatre feutres et du papier",
+    "intro": "Ce sont les feutres qui marchent encore. Le rouge fait le titre, les autres font les détails. On ne mélange jamais plus de trois couleurs sur la même feuille — sinon « ça fait sapin de Noël ».",
+    "swatches": [
+      { "name": "ROUGE CANTINE", "colorKey": "redLogo", "usage": "Titres, logo, tampons" },
+      { "name": "BLEU SIESTE", "colorKey": "blue", "usage": "Notes, réglure, liens" },
+      { "name": "VERT COUR", "colorKey": "green", "usage": "Ce qui est autorisé" },
+      { "name": "JAUNE GOÛTER", "colorKey": "yellow", "usage": "Scotch, surlignage" }
+    ],
+    "neutrals": [
+      { "name": "PAPIER", "colorKey": "card", "usage": "le fond, toujours" },
+      { "name": "ENCRE", "colorKey": "ink", "usage": "le texte, les traits" }
+    ]
+  },
+  "typography": {
+    "kicker": "04 — Les écritures",
+    "title": "Trois écritures, chacune son travail",
+    "rows": [
+      { "family": "display", "label": "BRICOLAGE GROTESQUE", "desc": "Extra-bold, pour les titres.\nC'est la voix du directeur : fort, mais gentil." },
+      { "family": "body", "label": "KARLA", "desc": "Pour tout ce qu'on lit vraiment.\nJamais en dessous de 14 px : Maman n'a pas ses lunettes." },
+      { "family": "hand", "label": "CAVEAT", "desc": "L'écriture à la main de Marin.\nSeulement pour les commentaires en bleu. Maximum un par page." }
+    ]
+  },
+  "students": {
+    "kicker": "05 — La classe",
+    "title": "Quatre élèves et un directeur",
+    "list": [
+      { "id": "marin", "name": "Marin, 6 ans", "desc": "Directeur, professeur, et celui qui décide quand la pause commence.", "photo": null },
+      { "id": "mael", "name": "Maël, 6ème", "desc": "Grand frère. Lève le doigt pour dire qu'il sait déjà. On l'écoute quand même.", "photo": null },
+      { "id": "parents", "name": "Maman & Papa", "desc": "Élèves du fond. Arrivent souvent en retard avec un téléphone à la main.", "photo": null },
+      { "id": "jojo", "name": "Jojo, 9 mois", "desc": "Mascotte officielle. Ne parle pas, mange le matériel pédagogique.", "photo": null }
+    ],
+    "footerQuote": "Jojo il a jamais eu de mauvaise note"
+  },
+  "schedule": {
+    "kicker": "06 — L'emploi du temps",
+    "title": "Une petite pause, c'est quand on a le temps",
+    "intro": "Il n'y a pas d'horaire. Une petite pause commence quand quelqu'un dit « on a cinq minutes » et se termine quand Jojo pleure. C'est le seul emploi du temps de l'école, et il est très respecté.",
+    "rows": [
+      { "time": "MINUTE 1", "desc": "Tout le monde s'assoit. Sur le canapé, par terre, ça n'a pas d'importance." },
+      { "time": "MINUTE 2", "desc": "Le directeur annonce le sujet du jour. Souvent les dinosaures. Parfois les volcans." },
+      { "time": "MINUTE 3-4", "desc": "Le cours. Maël a le droit de corriger une seule fois." },
+      { "time": "MINUTE 5", "desc": "Question surprise. Celui qui répond gagne un tampon." }
+    ]
+  },
+  "rules": {
+    "kicker": "07 — Le règlement",
+    "title": "Les règles de l'école",
+    "list": [
+      "On lève le doigt. Même Papa. Surtout Papa.",
+      "Pas de téléphone pendant le cours. Sauf pour vérifier si le directeur a raison.",
+      "On a le droit de ne pas savoir. C'est même le but de l'école.",
+      "Quand Jojo crie, la récréation est déclarée. Personne ne discute."
+    ]
+  },
+  "bans": {
+    "kicker": "08 — Ce qu'il ne faut pas faire",
+    "title": "Interdit, et c'est tout",
+    "list": [
+      "Étirer le logo pour qu'il rentre quelque part.",
+      "Écrire le nom de l'école tout en majuscules. Ça donne l'impression qu'on gronde.",
+      "Utiliser du violet, du rose fluo, ou une couleur qui n'est pas dans la trousse.",
+      "Faire un cours de plus de dix minutes. Ce n'est plus une petite pause."
+    ]
+  },
+  "goods": {
+    "kicker": "09 — Papeterie et goodies",
+    "title": "Le matériel officiel",
+    "items": [
+      { "id": "cahier", "label": "CAHIER DE L'ÉLÈVE", "caption": "photo — cahier avec le logo collé", "photo": null },
+      { "id": "tampon", "label": "TAMPON DE RÉCOMPENSE", "caption": "photo — le tampon « bravo »", "photo": null },
+      { "id": "affiche", "label": "AFFICHE « COURS EN COURS »", "caption": "photo — l'affiche de la porte", "photo": null }
+    ],
+    "footerQuote": "fin du livre des règles. maintenant on peut faire l'école."
+  }
+}
