@@ -57,6 +57,10 @@ export default function RootLayout({ children }) {
             <Link href="/devoirs">Devoirs</Link>
             <Link href="/fiches">Fiches prof</Link>
             <Link href="/messages">Messages</Link>
+            <Link href="/planning">Emploi du temps</Link>
+            <Link href="/recompenses">Récompenses</Link>
+            <Link href="/carnet">Carnet de notes</Link>
+            <Link href="/galerie">Galerie</Link>
             <Link href="/admin">Admin</Link>
           </nav>
         </div>

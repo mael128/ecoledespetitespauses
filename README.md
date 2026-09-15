@@ -1,6 +1,6 @@
 # École des Petites Pauses
 
-Site de « L'École des Petites Pauses » : la charte de marque, le cahier de textes (devoirs), les fiches prof, un panneau de messages, et une interface d'administration pour tout modifier sans toucher au code. App Next.js (App Router), pensée pour Vercel.
+Site de « L'École des Petites Pauses » : la charte de marque, le cahier de textes (devoirs), les fiches prof, un panneau de messages, l'emploi du temps, les récompenses, le carnet de notes, une galerie photos, et une interface d'administration pour tout modifier sans toucher au code. App Next.js (App Router), pensée pour Vercel.
 
 ## Structure
 
@@ -8,7 +8,11 @@ Site de « L'École des Petites Pauses » : la charte de marque, le cahier de te
 - `app/devoirs/page.js` — liste publique des devoirs, depuis `content/devoirs.json`.
 - `app/fiches/page.js` — liste publique des fiches prof (le classeur), depuis `content/fiches.json`.
 - `app/messages/page.js` — panneau d'annonces (changements d'horaire, etc.), depuis `content/messages.json`.
-- `app/admin/` — interface d'administration : édition du texte/couleurs de la charte, gestion des devoirs, des fiches, des messages, et upload des photos.
+- `app/planning/page.js` — emploi du temps interactif, groupé par jour, depuis `content/planning.json`.
+- `app/recompenses/page.js` — tableau des tampons/récompenses par élève, depuis `content/recompenses.json`.
+- `app/carnet/page.js` — carnet de notes et évaluations par élève, depuis `content/notes.json`.
+- `app/galerie/page.js` — galerie photos de la vie de l'école, depuis `content/galerie.json`.
+- `app/admin/` — interface d'administration : édition du texte/couleurs de la charte, gestion des devoirs, des fiches, des messages, de l'emploi du temps, des récompenses, du carnet de notes, de la galerie, et upload des photos.
 - `app/api/admin/*` — routes serveur appelées par l'admin ; elles committent directement les changements sur GitHub via l'API Contents.
 - `content/*.json` — le contenu du site, versionné dans le repo. Modifier ces fichiers (à la main ou via l'admin) et pousser sur `main` republie automatiquement le site sur Vercel.
 - `design-export/` — le bundle exporté depuis Claude Design (transcript + prototype `.dc.html` d'origine), conservé pour référence.
