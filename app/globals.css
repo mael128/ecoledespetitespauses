@@ -800,6 +800,173 @@ h1, h2 {
   line-height: 1.6;
 }
 
+/* ---------- Planning ---------- */
+
+.planning {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.planning-day__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.planning-day__rows {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid var(--ink);
+}
+
+.planning-row {
+  display: grid;
+  grid-template-columns: 140px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 2px solid var(--ink);
+  font-size: 15px;
+}
+
+.planning-row:last-child {
+  border-bottom: none;
+}
+
+.planning-row__time {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.planning-row__eleve {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--blue);
+}
+
+/* ---------- Récompenses ---------- */
+
+.tally-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px;
+}
+
+.tally-card {
+  border: 2px solid var(--ink);
+  background: var(--yellow-pale);
+  padding: 18px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tally-card__count {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 34px;
+}
+
+.tally-card__eleve {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.stamp {
+  border: 2px solid var(--ink);
+  background: var(--card-alt);
+  padding: 16px 20px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.stamp__tampon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.stamp__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ---------- Carnet de notes ---------- */
+
+.carnet-eleve {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.carnet-eleve__nom {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--blue);
+}
+
+.carnet-note {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--green);
+  border: 1px solid var(--green);
+  border-radius: 999px;
+  padding: 2px 10px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ---------- Galerie ---------- */
+
+.galerie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.galerie-item {
+  margin: 0;
+  border: 2px solid var(--ink);
+  background: var(--card-alt);
+  display: flex;
+  flex-direction: column;
+}
+
+.galerie-item__img {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  display: block;
+  border-bottom: 2px solid var(--ink);
+}
+
+.galerie-item__caption {
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.galerie-item__date {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+}
+
 /* ---------- Site nav ---------- */
 
 .site-nav {

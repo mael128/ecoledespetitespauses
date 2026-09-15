@@ -125,6 +125,10 @@ export default function AdminPage() {
             ["devoirs", "Devoirs"],
             ["fiches", "Fiches prof"],
             ["messages", "Messages"],
+            ["planning", "Emploi du temps"],
+            ["recompenses", "Récompenses"],
+            ["notes", "Carnet de notes"],
+            ["galerie", "Galerie"],
             ["photos", "Photos"],
           ].map(([key, label]) => (
             <button
@@ -203,10 +207,82 @@ export default function AdminPage() {
           ]}
         />
       )}
+      {tab === "planning" && (
+        <AdminListEditor
+          token={token}
+          endpoint="/api/admin/planning"
+          title="Emploi du temps"
+          emptyText="Rien de programmé pour l'instant."
+          makeEmpty={() => ({
+            id: `p-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            jour: "Lundi",
+            debut: "",
+            fin: "",
+            matiere: "",
+            eleve: "",
+          })}
+          fields={[
+            { key: "jour", label: "Jour", type: "select", options: JOURS },
+            { key: "debut", label: "Début", type: "time" },
+            { key: "fin", label: "Fin", type: "time" },
+            { key: "matiere", label: "Matière" },
+            { key: "eleve", label: "Élève" },
+          ]}
+        />
+      )}
+      {tab === "recompenses" && (
+        <AdminListEditor
+          token={token}
+          endpoint="/api/admin/recompenses"
+          title="Récompenses"
+          emptyText="Pas encore de tampon distribué."
+          makeEmpty={() => ({
+            id: `r-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            eleve: "Marin",
+            tampon: "⭐",
+            motif: "",
+            date: new Date().toISOString().slice(0, 10),
+          })}
+          fields={[
+            { key: "eleve", label: "Élève" },
+            { key: "tampon", label: "Tampon (emoji)" },
+            { key: "motif", label: "Motif", type: "textarea" },
+            { key: "date", label: "Date", type: "date" },
+          ]}
+        />
+      )}
+      {tab === "notes" && (
+        <AdminListEditor
+          token={token}
+          endpoint="/api/admin/notes"
+          title="Carnet de notes"
+          emptyText="Aucune évaluation pour l'instant."
+          makeEmpty={() => ({
+            id: `n-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            eleve: "Maël",
+            matiere: "",
+            titre: "",
+            note: "",
+            appreciation: "",
+            date: new Date().toISOString().slice(0, 10),
+          })}
+          fields={[
+            { key: "eleve", label: "Élève" },
+            { key: "matiere", label: "Matière" },
+            { key: "titre", label: "Titre" },
+            { key: "note", label: "Note" },
+            { key: "appreciation", label: "Appréciation", type: "textarea" },
+            { key: "date", label: "Date", type: "date" },
+          ]}
+        />
+      )}
+      {tab === "galerie" && <GalerieEditor token={token} />}
       {tab === "photos" && <PhotosEditor token={token} />}
     </main>
   );
 }
+
+const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 
 function GuidelinesEditor({ token }) {
   const [data, setData] = useState(null);
@@ -431,15 +507,30 @@ function AdminListEditor({ token, endpoint, title, emptyText, makeEmpty, fields 
                 <input type="checkbox" checked={!!item[f.key]} onChange={(e) => updateAt(i, { [f.key]: e.target.checked })} />
                 <span>{f.label}</span>
               </label>
-            ) : f.type === "date" ? (
+            ) : f.type === "date" || f.type === "time" ? (
               <label className="admin-field" key={f.key}>
                 <span className="admin-field__label">{f.label}</span>
                 <input
                   className="admin-field__input"
-                  type="date"
+                  type={f.type}
                   value={item[f.key] || ""}
                   onChange={(e) => updateAt(i, { [f.key]: e.target.value })}
                 />
+              </label>
+            ) : f.type === "select" ? (
+              <label className="admin-field" key={f.key}>
+                <span className="admin-field__label">{f.label}</span>
+                <select
+                  className="admin-field__input"
+                  value={item[f.key] || ""}
+                  onChange={(e) => updateAt(i, { [f.key]: e.target.value })}
+                >
+                  {f.options.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </select>
               </label>
             ) : (
               <Field
@@ -533,6 +624,124 @@ function PhotosEditor({ token }) {
             onUpload={(file) => upload(`goods:${g.id}`, file)}
           />
         ))}
+      </div>
+    </section>
+  );
+}
+
+function GalerieEditor({ token }) {
+  const [list, setList] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [newLegende, setNewLegende] = useState("");
+  const [error, setError] = useState(null);
+  const [message, flash] = useSavedFlash();
+
+  useEffect(() => {
+    adminFetch("/api/admin/galerie", token)
+      .then(setList)
+      .catch((e) => setError(String(e.message || e)))
+      .finally(() => setLoading(false));
+  }, [token]);
+
+  function updateAt(i, patch) {
+    setList((prev) => prev.map((item, idx) => (idx === i ? { ...item, ...patch } : item)));
+  }
+
+  async function uploadPhoto(file) {
+    setUploading(true);
+    setError(null);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("legende", newLegende);
+      const res = await adminFetch("/api/admin/galerie-photo", token, { method: "POST", body: form });
+      setList((prev) => [...(prev || []), res.entry]);
+      setNewLegende("");
+      flash("Photo ajoutée ! Le site va se reconstruire dans une minute ou deux.");
+    } catch (e) {
+      setError(String(e.message || e));
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function save() {
+    setSaving(true);
+    setError(null);
+    try {
+      await adminFetch("/api/admin/galerie", token, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(list),
+      });
+      flash("Enregistré ! Le site va se reconstruire dans une minute ou deux.");
+    } catch (e) {
+      setError(String(e.message || e));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (loading) return <section className="card"><p className="schedule-intro">Chargement…</p></section>;
+  if (!list) return <section className="card"><p className="admin-error">{error || "Impossible de charger le contenu."}</p></section>;
+
+  return (
+    <section className="card">
+      <h2>Galerie</h2>
+      {error ? <p className="admin-error">{error}</p> : null}
+      {message ? <p className="admin-success">{message}</p> : null}
+
+      <div className="admin-field">
+        <span className="admin-field__label">Ajouter une photo</span>
+        <Field label="Légende" value={newLegende} onChange={setNewLegende} />
+        <input
+          type="file"
+          accept="image/png,image/jpeg,image/webp,image/gif"
+          disabled={uploading}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) uploadPhoto(file);
+            e.target.value = "";
+          }}
+        />
+        {uploading ? <span className="admin-field__label">Envoi…</span> : null}
+      </div>
+
+      <hr className="admin-divider" />
+
+      {list.length === 0 ? <p className="schedule-intro">Pas encore de photo.</p> : null}
+      <div className="admin-grid admin-grid--2">
+        {list.map((item, i) => (
+          <div className="admin-photo-slot" key={item.id}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={item.url} alt={item.legende || ""} className="admin-photo-slot__preview" />
+            <Field label="Légende" value={item.legende} onChange={(v) => updateAt(i, { legende: v })} />
+            <label className="admin-field">
+              <span className="admin-field__label">Date</span>
+              <input
+                className="admin-field__input"
+                type="date"
+                value={(item.date || "").slice(0, 10)}
+                onChange={(e) => updateAt(i, { date: e.target.value })}
+              />
+            </label>
+            <button
+              type="button"
+              className="admin-btn admin-btn--danger"
+              onClick={() => setList((prev) => prev.filter((_, idx) => idx !== i))}
+            >
+              Supprimer
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <div className="admin-save-bar">
+        <button className="admin-btn admin-btn--primary" onClick={save} disabled={saving}>
+          {saving ? "Enregistrement…" : "Enregistrer sur GitHub"}
+        </button>
       </div>
     </section>
   );
