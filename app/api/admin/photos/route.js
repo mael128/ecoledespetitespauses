@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireAdminSession } from "../../../../lib/require-admin";
+import { requireAdminToken } from "../../../../lib/require-admin-token";
 import { getFile, putFile, putJsonFile } from "../../../../lib/github";
 
 const MAX_SIZE = 4 * 1024 * 1024; // 4MB, comfortably under Vercel's serverless body limit
@@ -28,7 +28,7 @@ function applyPhoto(guidelines, slot, url) {
 }
 
 export async function POST(request) {
-  const { session, error } = await requireAdminSession();
+  const { token, error } = requireAdminToken(request);
   if (error) return error;
 
   const form = await request.formData();
@@ -52,17 +52,13 @@ export async function POST(request) {
 
   try {
     const buffer = Buffer.from(await file.arrayBuffer());
-    await putFile(path, buffer, `Photo : ${safeSlotName} (${session.user?.login || session.user?.name})`);
+    await putFile(path, buffer, `Photo : ${safeSlotName}`, token);
 
-    const current = await getFile("content/guidelines.json");
+    const current = await getFile("content/guidelines.json", token);
     const guidelines = current ? JSON.parse(current.content) : null;
     if (!guidelines) throw new Error("content/guidelines.json introuvable");
     applyPhoto(guidelines, slot, url);
-    await putJsonFile(
-      "content/guidelines.json",
-      guidelines,
-      `Photo : lien mis à jour pour ${safeSlotName}`
-    );
+    await putJsonFile("content/guidelines.json", guidelines, `Photo : lien mis à jour pour ${safeSlotName}`, token);
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

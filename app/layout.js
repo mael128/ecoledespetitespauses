@@ -55,6 +55,8 @@ export default function RootLayout({ children }) {
           <nav className="site-nav" style={{ marginTop: "clamp(14px, 3vw, 24px)" }}>
             <Link href="/">Charte de marque</Link>
             <Link href="/devoirs">Devoirs</Link>
+            <Link href="/fiches">Fiches prof</Link>
+            <Link href="/messages">Messages</Link>
             <Link href="/admin">Admin</Link>
           </nav>
         </div>

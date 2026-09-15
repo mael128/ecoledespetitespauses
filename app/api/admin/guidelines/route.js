@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
-import { requireAdminSession } from "../../../../lib/require-admin";
+import { requireAdminToken } from "../../../../lib/require-admin-token";
 import { getFile, putJsonFile } from "../../../../lib/github";
 
-export async function GET() {
-  const { error } = await requireAdminSession();
+export async function GET(request) {
+  const { token, error } = requireAdminToken(request);
   if (error) return error;
 
   try {
-    const file = await getFile("content/guidelines.json");
+    const file = await getFile("content/guidelines.json", token);
     return NextResponse.json(file ? JSON.parse(file.content) : null);
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
@@ -15,7 +15,7 @@ export async function GET() {
 }
 
 export async function POST(request) {
-  const { session, error } = await requireAdminSession();
+  const { token, error } = requireAdminToken(request);
   if (error) return error;
 
   const body = await request.json();
@@ -24,11 +24,7 @@ export async function POST(request) {
   }
 
   try {
-    await putJsonFile(
-      "content/guidelines.json",
-      body,
-      `Charte de marque : mise à jour par ${session.user?.login || session.user?.name}`
-    );
+    await putJsonFile("content/guidelines.json", body, "Charte de marque : mise à jour depuis l'admin", token);
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

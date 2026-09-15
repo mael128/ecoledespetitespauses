@@ -769,6 +769,37 @@ h1, h2 {
   padding: 2px 10px;
 }
 
+.message {
+  border: 2px solid var(--ink);
+  background: var(--card-alt);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.message__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.message__auteur {
+  color: var(--blue);
+  font-weight: 500;
+}
+
+.message__texte {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
 /* ---------- Site nav ---------- */
 
 .site-nav {

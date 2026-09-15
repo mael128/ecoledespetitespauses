@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSession, signIn, signOut } from "next-auth/react";
 import { Field, ColorField, StringListEditor } from "./fields";
 import { setPath } from "../../lib/set-path";
+
+const TOKEN_KEY = "eppp_admin_token";
 
 const COLOR_LABELS = {
   paper: "Papier (fond)",
@@ -30,11 +31,56 @@ const COLOR_LABELS = {
 const STUDENT_LABEL_BY_ID = { marin: "Marin", mael: "Maël", parents: "Maman & Papa", jojo: "Jojo" };
 const GOODS_LABEL_BY_ID = { cahier: "Cahier", tampon: "Tampon", affiche: "Affiche" };
 
+async function adminFetch(url, token, options = {}) {
+  const res = await fetch(url, {
+    ...options,
+    headers: { ...(options.headers || {}), Authorization: `Bearer ${token}` },
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json.error || `Erreur ${res.status}`);
+  return json;
+}
+
+function useSavedFlash() {
+  const [message, setMessage] = useState(null);
+  function flash(msg) {
+    setMessage(msg);
+    setTimeout(() => setMessage(null), 3000);
+  }
+  return [message, flash];
+}
+
 export default function AdminPage() {
-  const { data: session, status } = useSession();
+  const [hydrated, setHydrated] = useState(false);
+  const [token, setToken] = useState(null);
+  const [tokenInput, setTokenInput] = useState("");
   const [tab, setTab] = useState("guidelines");
 
-  if (status === "loading") {
+  useEffect(() => {
+    try {
+      setToken(localStorage.getItem(TOKEN_KEY));
+    } catch {}
+    setHydrated(true);
+  }, []);
+
+  function connect() {
+    const trimmed = tokenInput.trim();
+    if (!trimmed) return;
+    try {
+      localStorage.setItem(TOKEN_KEY, trimmed);
+    } catch {}
+    setToken(trimmed);
+    setTokenInput("");
+  }
+
+  function disconnect() {
+    try {
+      localStorage.removeItem(TOKEN_KEY);
+    } catch {}
+    setToken(null);
+  }
+
+  if (!hydrated) {
     return (
       <main className="page">
         <p className="schedule-intro">Chargement…</p>
@@ -42,15 +88,19 @@ export default function AdminPage() {
     );
   }
 
-  if (!session) {
+  if (!token) {
     return (
       <main className="page">
-        <section className="card" style={{ alignItems: "center", textAlign: "center" }}>
+        <section className="card" style={{ gap: 18 }}>
           <div className="kicker">Admin</div>
           <h2>Connexion</h2>
-          <p className="schedule-intro">Réservé au directeur et à sa famille.</p>
-          <button className="admin-btn admin-btn--primary" onClick={() => signIn("github")}>
-            Se connecter avec GitHub
+          <p className="schedule-intro">
+            Colle ton token GitHub (fine-grained, accès en écriture sur ce seul repo). Il reste dans ton navigateur —
+            il n'est jamais envoyé ailleurs qu'à GitHub, via ce site.
+          </p>
+          <Field label="Token GitHub" value={tokenInput} onChange={setTokenInput} />
+          <button className="admin-btn admin-btn--primary" onClick={connect} disabled={!tokenInput.trim()}>
+            Se connecter
           </button>
         </section>
       </main>
@@ -63,42 +113,102 @@ export default function AdminPage() {
         <div className="admin-header">
           <div>
             <div className="kicker">Admin</div>
-            <h2>Bonjour {session.user?.login || session.user?.name}</h2>
+            <h2>Bonjour !</h2>
           </div>
-          <button className="admin-btn" onClick={() => signOut()}>
-            Se déconnecter
+          <button className="admin-btn" onClick={disconnect}>
+            Oublier le token
           </button>
         </div>
         <div className="admin-tabs">
-          <button className={`admin-tab${tab === "guidelines" ? " admin-tab--active" : ""}`} onClick={() => setTab("guidelines")}>
-            Charte de marque
-          </button>
-          <button className={`admin-tab${tab === "devoirs" ? " admin-tab--active" : ""}`} onClick={() => setTab("devoirs")}>
-            Devoirs
-          </button>
-          <button className={`admin-tab${tab === "photos" ? " admin-tab--active" : ""}`} onClick={() => setTab("photos")}>
-            Photos
-          </button>
+          {[
+            ["guidelines", "Charte de marque"],
+            ["devoirs", "Devoirs"],
+            ["fiches", "Fiches prof"],
+            ["messages", "Messages"],
+            ["photos", "Photos"],
+          ].map(([key, label]) => (
+            <button
+              key={key}
+              className={`admin-tab${tab === key ? " admin-tab--active" : ""}`}
+              onClick={() => setTab(key)}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </section>
 
-      {tab === "guidelines" && <GuidelinesEditor />}
-      {tab === "devoirs" && <DevoirsEditor />}
-      {tab === "photos" && <PhotosEditor />}
+      {tab === "guidelines" && <GuidelinesEditor token={token} />}
+      {tab === "devoirs" && (
+        <AdminListEditor
+          token={token}
+          endpoint="/api/admin/devoirs"
+          title="Devoirs"
+          emptyText="Aucun devoir pour l'instant."
+          makeEmpty={() => ({
+            id: `d-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            eleve: "Maël",
+            matiere: "",
+            titre: "",
+            description: "",
+            date: "",
+            fait: false,
+          })}
+          fields={[
+            { key: "eleve", label: "Élève" },
+            { key: "matiere", label: "Matière" },
+            { key: "titre", label: "Titre" },
+            { key: "description", label: "Description", type: "textarea" },
+            { key: "date", label: "Date", type: "date" },
+            { key: "fait", label: "Fait", type: "checkbox" },
+          ]}
+        />
+      )}
+      {tab === "fiches" && (
+        <AdminListEditor
+          token={token}
+          endpoint="/api/admin/fiches"
+          title="Fiches prof"
+          emptyText="Le classeur est vide."
+          makeEmpty={() => ({
+            id: `f-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            matiere: "",
+            titre: "",
+            contenu: "",
+            date: "",
+          })}
+          fields={[
+            { key: "matiere", label: "Matière" },
+            { key: "titre", label: "Titre" },
+            { key: "contenu", label: "Contenu", type: "textarea" },
+            { key: "date", label: "Date", type: "date" },
+          ]}
+        />
+      )}
+      {tab === "messages" && (
+        <AdminListEditor
+          token={token}
+          endpoint="/api/admin/messages"
+          title="Messages"
+          emptyText="Aucun message."
+          makeEmpty={() => ({
+            id: `m-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            auteur: "",
+            texte: "",
+            date: new Date().toISOString(),
+          })}
+          fields={[
+            { key: "auteur", label: "Auteur" },
+            { key: "texte", label: "Message", type: "textarea" },
+          ]}
+        />
+      )}
+      {tab === "photos" && <PhotosEditor token={token} />}
     </main>
   );
 }
 
-function useSavedFlash() {
-  const [message, setMessage] = useState(null);
-  function flash(msg) {
-    setMessage(msg);
-    setTimeout(() => setMessage(null), 3000);
-  }
-  return [message, flash];
-}
-
-function GuidelinesEditor() {
+function GuidelinesEditor({ token }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -106,17 +216,11 @@ function GuidelinesEditor() {
   const [message, flash] = useSavedFlash();
 
   useEffect(() => {
-    fetch("/api/admin/guidelines")
-      .then((r) => r.json())
-      .then((json) => {
-        setData(json);
-        setLoading(false);
-      })
-      .catch((e) => {
-        setError(String(e));
-        setLoading(false);
-      });
-  }, []);
+    adminFetch("/api/admin/guidelines", token)
+      .then(setData)
+      .catch((e) => setError(String(e.message || e)))
+      .finally(() => setLoading(false));
+  }, [token]);
 
   function set(path, value) {
     setData((prev) => setPath(prev, path, value));
@@ -126,13 +230,11 @@ function GuidelinesEditor() {
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch("/api/admin/guidelines", {
+      await adminFetch("/api/admin/guidelines", token, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Erreur inconnue");
       flash("Enregistré ! Le site va se reconstruire dans une minute ou deux.");
     } catch (e) {
       setError(String(e.message || e));
@@ -142,7 +244,7 @@ function GuidelinesEditor() {
   }
 
   if (loading) return <section className="card"><p className="schedule-intro">Chargement…</p></section>;
-  if (!data) return <section className="card"><p className="schedule-intro">Impossible de charger le contenu.</p></section>;
+  if (!data) return <section className="card"><p className="admin-error">{error || "Impossible de charger le contenu."}</p></section>;
 
   return (
     <>
@@ -279,19 +381,7 @@ function GuidelinesEditor() {
   );
 }
 
-function emptyDevoir() {
-  return {
-    id: `d-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    eleve: "Maël",
-    matiere: "",
-    titre: "",
-    description: "",
-    date: "",
-    fait: false,
-  };
-}
-
-function DevoirsEditor() {
+function AdminListEditor({ token, endpoint, title, emptyText, makeEmpty, fields }) {
   const [list, setList] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -299,33 +389,25 @@ function DevoirsEditor() {
   const [message, flash] = useSavedFlash();
 
   useEffect(() => {
-    fetch("/api/admin/devoirs")
-      .then((r) => r.json())
-      .then((json) => {
-        setList(json);
-        setLoading(false);
-      })
-      .catch((e) => {
-        setError(String(e));
-        setLoading(false);
-      });
-  }, []);
+    adminFetch(endpoint, token)
+      .then(setList)
+      .catch((e) => setError(String(e.message || e)))
+      .finally(() => setLoading(false));
+  }, [token, endpoint]);
 
   function updateAt(i, patch) {
-    setList((prev) => prev.map((d, idx) => (idx === i ? { ...d, ...patch } : d)));
+    setList((prev) => prev.map((item, idx) => (idx === i ? { ...item, ...patch } : item)));
   }
 
   async function save() {
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch("/api/admin/devoirs", {
+      await adminFetch(endpoint, token, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(list),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Erreur inconnue");
       flash("Enregistré ! Le site va se reconstruire dans une minute ou deux.");
     } catch (e) {
       setError(String(e.message || e));
@@ -335,47 +417,52 @@ function DevoirsEditor() {
   }
 
   if (loading) return <section className="card"><p className="schedule-intro">Chargement…</p></section>;
-  if (!list) return <section className="card"><p className="schedule-intro">Impossible de charger les devoirs.</p></section>;
+  if (!list) return <section className="card"><p className="admin-error">{error || "Impossible de charger le contenu."}</p></section>;
 
   return (
     <section className="card">
-      <h2>Devoirs</h2>
-      {list.length === 0 ? <p className="schedule-intro">Aucun devoir pour l'instant.</p> : null}
-      {list.map((d, i) => (
-        <div className="admin-devoir-row" key={d.id}>
-          <div className="admin-grid admin-grid--2">
-            <Field label="Élève" value={d.eleve} onChange={(v) => updateAt(i, { eleve: v })} />
-            <Field label="Matière" value={d.matiere} onChange={(v) => updateAt(i, { matiere: v })} />
-          </div>
-          <Field label="Titre" value={d.titre} onChange={(v) => updateAt(i, { titre: v })} />
-          <Field label="Description" value={d.description} onChange={(v) => updateAt(i, { description: v })} textarea />
-          <div className="admin-grid admin-grid--2">
-            <label className="admin-field">
-              <span className="admin-field__label">Date</span>
-              <input
-                className="admin-field__input"
-                type="date"
-                value={d.date || ""}
-                onChange={(e) => updateAt(i, { date: e.target.value })}
+      <h2>{title}</h2>
+      {list.length === 0 ? <p className="schedule-intro">{emptyText}</p> : null}
+      {list.map((item, i) => (
+        <div className="admin-devoir-row" key={item.id}>
+          {fields.map((f) =>
+            f.type === "checkbox" ? (
+              <label className="admin-field admin-field--checkbox" key={f.key}>
+                <input type="checkbox" checked={!!item[f.key]} onChange={(e) => updateAt(i, { [f.key]: e.target.checked })} />
+                <span>{f.label}</span>
+              </label>
+            ) : f.type === "date" ? (
+              <label className="admin-field" key={f.key}>
+                <span className="admin-field__label">{f.label}</span>
+                <input
+                  className="admin-field__input"
+                  type="date"
+                  value={item[f.key] || ""}
+                  onChange={(e) => updateAt(i, { [f.key]: e.target.value })}
+                />
+              </label>
+            ) : (
+              <Field
+                key={f.key}
+                label={f.label}
+                value={item[f.key]}
+                onChange={(v) => updateAt(i, { [f.key]: v })}
+                textarea={f.type === "textarea"}
               />
-            </label>
-            <label className="admin-field admin-field--checkbox">
-              <input type="checkbox" checked={!!d.fait} onChange={(e) => updateAt(i, { fait: e.target.checked })} />
-              <span>Fait</span>
-            </label>
-          </div>
+            )
+          )}
           <button
             type="button"
             className="admin-btn admin-btn--danger"
             onClick={() => setList((prev) => prev.filter((_, idx) => idx !== i))}
           >
-            Supprimer ce devoir
+            Supprimer
           </button>
           <hr className="admin-divider" />
         </div>
       ))}
-      <button type="button" className="admin-btn" onClick={() => setList((prev) => [...prev, emptyDevoir()])}>
-        + Ajouter un devoir
+      <button type="button" className="admin-btn" onClick={() => setList((prev) => [...prev, makeEmpty()])}>
+        + Ajouter
       </button>
 
       <div className="admin-save-bar">
@@ -389,7 +476,7 @@ function DevoirsEditor() {
   );
 }
 
-function PhotosEditor() {
+function PhotosEditor({ token }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [busySlot, setBusySlot] = useState(null);
@@ -397,17 +484,11 @@ function PhotosEditor() {
   const [message, flash] = useSavedFlash();
 
   useEffect(() => {
-    fetch("/api/admin/guidelines")
-      .then((r) => r.json())
-      .then((json) => {
-        setData(json);
-        setLoading(false);
-      })
-      .catch((e) => {
-        setError(String(e));
-        setLoading(false);
-      });
-  }, []);
+    adminFetch("/api/admin/guidelines", token)
+      .then(setData)
+      .catch((e) => setError(String(e.message || e)))
+      .finally(() => setLoading(false));
+  }, [token]);
 
   async function upload(slot, file) {
     setBusySlot(slot);
@@ -416,9 +497,7 @@ function PhotosEditor() {
       const form = new FormData();
       form.append("slot", slot);
       form.append("file", file);
-      const res = await fetch("/api/admin/photos", { method: "POST", body: form });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Erreur inconnue");
+      await adminFetch("/api/admin/photos", token, { method: "POST", body: form });
       flash("Photo envoyée ! Le site va se reconstruire dans une minute ou deux.");
     } catch (e) {
       setError(String(e.message || e));
@@ -428,7 +507,7 @@ function PhotosEditor() {
   }
 
   if (loading) return <section className="card"><p className="schedule-intro">Chargement…</p></section>;
-  if (!data) return <section className="card"><p className="schedule-intro">Impossible de charger le contenu.</p></section>;
+  if (!data) return <section className="card"><p className="admin-error">{error || "Impossible de charger le contenu."}</p></section>;
 
   return (
     <section className="card">
